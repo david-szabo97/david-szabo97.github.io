@@ -44,10 +44,10 @@
       canvas.height = canvas.style.height = document.body.offsetHeight;
 
       // Constants
-      const DRAW_OFFSET = 500;
+      const DRAW_OFFSET = {x: canvas.width / 2, y: canvas.height / 2};
 
-      const GRAPH_SIZE = 300;
-      const FILL_SIZE = 100;
+      const GRAPH_SIZE = canvas.height / 3;
+      const FILL_SIZE = GRAPH_SIZE / 3;
       
       const TEXTS = ["STR", "VIT", "LUK", "INT", "DEX", "AGI"];
       const NODE_COUNT = TEXTS.length;
@@ -106,7 +106,7 @@
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
         // Add some offset so we can see the graph clearly
-        ctx.translate(DRAW_OFFSET, DRAW_OFFSET);
+        ctx.translate(DRAW_OFFSET.x, DRAW_OFFSET.y);
         
         /* Draw graph */
         ctx.beginPath();
