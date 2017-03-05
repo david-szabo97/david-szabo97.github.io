@@ -2,8 +2,10 @@
 
 Stuff when I have some free time.
 
-### Rangarok Online character creator's stat allocator
+### [Rangarok Online character creator's stat allocator](david-szabo97.github.io/rolikestat)
 
-[david-szabo97.github.io/rolikestat](david-szabo97.github.io/rolikestat)
+A clone of the Ragnarok Online's character creator's stat allocator.
 
-Tetsting my math skills :D
+If you don't know this game then checkout the screenshot below :arrow_down:
+
+![Ragnarok Online Character Creator](http://www.playragnarok.com/Images/gameguide/Howtoplay/basicsystem_07.png)
