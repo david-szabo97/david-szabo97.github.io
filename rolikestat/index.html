@@ -101,7 +101,8 @@
       }
 
       function render() {
-        ctx.fillStyle = "black";
+        ctx.fillStyle = ctx.strokeStyle = "#bbc2c5";
+        ctx.save();
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
         // Add some offset so we can see the graph clearly
@@ -113,21 +114,41 @@
         ctx.closePath();
         ctx.stroke();
 
-        /* Draw arrows + text */
-        ctx.textBaseline = "middle";
-        ctx.textAlign = "center";
-        ARROWS.forEach((arrow, i) => {
-          var center = triangleCenter(arrow);
-          ctx.fillText(TEXTS[i] + " " + STATS[i], center.x, center.y);
-
+        /* Draw dividers */
+        NODES.forEach((n) => {
           ctx.beginPath();
-          arrow.forEach((n) => ctx.lineTo(n.x, n.y))
-          ctx.closePath();
+          ctx.moveTo(0, 0);
+          ctx.lineTo(n.x, n.y);
           ctx.stroke();
         });
 
+        /* Draw arrows + text */
+        ctx.textBaseline = "middle";
+        ctx.textAlign = "center";
+        ctx.font = "bold 14px Helvetica";
+        
+        ARROWS.forEach((arrow, i) => {
+          // Arrow
+          ctx.fillStyle = "#c5d1f1";
+          ctx.save();
+          ctx.shadowColor = '#555';
+          ctx.shadowBlur = 3;
+          ctx.shadowOffsetX = 2;
+          ctx.shadowOffsetY = 2;
+          ctx.beginPath();
+          arrow.forEach((n) => ctx.lineTo(n.x, n.y))
+          ctx.closePath();
+          ctx.fill();
+          ctx.restore();
+          
+          // Text
+          var center = triangleCenter(arrow);
+          ctx.fillStyle = "#304065";
+          ctx.fillText(TEXTS[i] + " " + STATS[i], center.x, center.y);
+        });
+
         /* Filling */
-        ctx.fillStyle = "lightblue";
+        ctx.fillStyle = "#7b96cd";
 
         // Calculate the remaining space between the two points
         var fullGap = GRAPH_SIZE - FILL_SIZE;
@@ -142,8 +163,8 @@
         ctx.fill();
 
         // Let's go back to the start point
-        ctx.translate(-DRAW_OFFSET, -DRAW_OFFSET);
-        
+        ctx.restore();
+
         // Let's render again!
         window.requestAnimationFrame(render);
       }
