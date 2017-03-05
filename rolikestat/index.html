@@ -1,0 +1,150 @@
+<!DOCTYPE HTML>
+<html>
+  <head><style>* {margin: 0; padding: 0;} html,body {width: 100%; height: 100%; overflow: hidden;}</style></head>
+  <body>
+    <canvas id="c"></canvas>
+
+    <script>
+      var canvas = document.getElementById("c");
+      var ctx = canvas.getContext("2d");
+      
+      canvas.width = canvas.style.width = document.body.offsetWidth;
+      canvas.height = canvas.style.height = document.body.offsetHeight;
+
+      const NODE_COUNT = 6;
+      const GRAPH_SIZE = 300;
+      const TEXTS = ["STR", "VIT", "LUK", "INT", "DEX", "AGI"];
+      const ARROW_WIDTH = 25;
+      const ARROW_HEIGHT = 50;
+
+      const FILL_SIZE = 100;
+
+      const DRAW_OFFSET = 500;
+
+      var START_STAT = 5;
+      var STATS = [START_STAT, START_STAT, START_STAT, START_STAT, START_STAT, START_STAT];
+      var MAX_STAT = START_STAT * 2 - 1;
+      var ARROWS = [];
+
+      function isInPoly(verts, testx, testy) {
+        var nvert = verts.length;
+        var i, j, c = 0;
+        for (i = 0, j = nvert-1; i < nvert; j = i++) {
+          if ( ((verts[i].y>testy) != (verts[j].y>testy)) &&
+          (testx < (verts[j].x-verts[i].x) * (testy-verts[i].y) / (verts[j].y-verts[i].y) + verts[i].x) )
+            c = !c;
+        }
+        return c;
+      }
+
+      function render() {
+        ctx.fillStyle = "black";
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        ctx.translate(DRAW_OFFSET, DRAW_OFFSET);
+        
+        // Draw graph
+        var coords = [];
+        
+        ctx.beginPath();
+        var step = (Math.PI * 2) / NODE_COUNT;
+        var stepOffset = -Math.PI / 2;
+        for (var i = 0; i < NODE_COUNT; i++) {
+          var cos = Math.cos(step * i + stepOffset);
+          var sin = Math.sin(step * i + stepOffset);
+          var x = cos * GRAPH_SIZE;
+          var y = sin * GRAPH_SIZE; 
+          coords.push({x, y});
+          ctx.lineTo(x, y);
+        }
+        ctx.closePath();
+        ctx.stroke();
+
+        // Draw arrows + text
+        var arrows = [];
+        for (var i = 0; i < NODE_COUNT; i++) {
+          var cx = coords[i].x * 1.1;
+          var cy = coords[i].y * 1.1;
+          
+          var rotation = step * i + Math.PI;
+
+          
+          // Transform
+          ctx.save();
+          ctx.translate(cx, cy);
+          ctx.rotate(rotation);
+
+          // Stat text
+          ctx.textBaseline = "middle";
+          ctx.textAlign = "center";
+          ctx.fillText(TEXTS[i] + " " + STATS[i], (-ARROW_WIDTH + ARROW_WIDTH + 0) / 3, (-ARROW_HEIGHT / 2 + -ARROW_HEIGHT / 2 + ARROW_HEIGHT / 2) / 3);
+
+          // Vertices
+          var verts = [{x: -ARROW_WIDTH, y: -ARROW_HEIGHT / 2}, {x: ARROW_WIDTH, y: -ARROW_HEIGHT / 2}, {x: 0, y: ARROW_HEIGHT / 2}];
+          verts = verts.map((v) => ({x: v.x, y: v.y}));
+          var verts2 = verts.map((v) => ({x: v.x * Math.cos(rotation) - v.y * Math.sin(rotation) + cx, y: v.x * Math.sin(rotation) + v.y * Math.cos(rotation) + cy}));
+          arrows.push(verts2);
+          if (isInPoly(verts2, MOUSE_X - DRAW_OFFSET, MOUSE_Y - DRAW_OFFSET)) {
+            ctx.strokeStyle = "red";
+          }
+
+          // Triangle
+          // Pointing toward bottom of the screen by default
+          ctx.beginPath();
+          for (var j = 0; j < verts.length; j++) {
+            ctx.lineTo(verts[j].x, verts[j].y);
+          }
+          ctx.closePath(); // Top left
+          ctx.stroke();
+
+          // Transform
+          ctx.rotate(rotation);
+          ctx.translate(-cx, -cy);
+          ctx.restore();
+        }
+        if (ARROWS.length == 0) {
+          ARROWS = arrows;
+        }
+
+        // Filling
+        ctx.beginPath();
+        var ratio = FILL_SIZE / GRAPH_SIZE;
+        ctx.fillStyle = "lightblue";
+        for (var i = 0; i < NODE_COUNT; i++) {
+          var x = coords[i].x;
+          var y = coords[i].y; 
+
+          var fullGap = GRAPH_SIZE - FILL_SIZE;
+          
+          ctx.lineTo(x * ((((fullGap * STATS[i] / MAX_STAT) / fullGap))), y * ((((fullGap * STATS[i] / MAX_STAT) / fullGap))));
+        }
+        ctx.closePath();
+        ctx.fill();
+        ctx.translate(-DRAW_OFFSET, -DRAW_OFFSET);
+        
+        window.requestAnimationFrame(render);
+      }
+
+      var MOUSE_X = 0, MOUSE_Y = 0;
+      function mousemove(e) {
+        MOUSE_X = e.pageX;
+        MOUSE_Y = e.pageY;
+      }
+      canvas.addEventListener("mousemove", mousemove);
+
+      function mouseclick(e) {
+        for (var i = 0; i < ARROWS.length; i++) {
+          if (isInPoly(ARROWS[i], MOUSE_X - DRAW_OFFSET, MOUSE_Y - DRAW_OFFSET)) {
+            if (STATS[i] < MAX_STAT) {
+              STATS[i]++;
+              STATS[(i+3)%ARROWS.length]--;
+            }
+          }
+        }
+      }
+      canvas.addEventListener("click", mouseclick);
+
+      render();
+    </script>
+  </body>
+  </html>
